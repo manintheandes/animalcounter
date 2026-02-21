@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Count</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: default;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .label-top {
+    font-size: 10px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 12px;
+  }
+
+  .main-counter {
+    font-size: clamp(48px, 12vw, 140px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: #fff;
+    transition: none;
+    letter-spacing: -2px;
+  }
+
+  .main-counter.paused {
+    color: #000;
+    text-shadow: 0 0 1px #333;
+  }
+
+  .since {
+    font-size: 11px;
+    color: #222;
+    margin-top: 8px;
+    letter-spacing: 3px;
+  }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: #1a1a1a;
+    margin: 48px 0;
+  }
+
+  .label-bottom {
+    font-size: 10px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+  }
+
+  .offset-counter {
+    font-size: clamp(20px, 4vw, 48px);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    color: #1a1a1a;
+    line-height: 1;
+  }
+
+  .offset-label {
+    font-size: 10px;
+    color: #111;
+    margin-top: 8px;
+    letter-spacing: 3px;
+  }
+
+  .pause-hint {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: #151515;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  .pause-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.05s;
+  }
+  .pause-flash.active {
+    opacity: 0.03;
+  }
+
+  .source {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    font-size: 8px;
+    color: #111;
+    letter-spacing: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="label-top">Land animals killed for food</div>
+<div class="main-counter" id="main">0</div>
+<div class="since" id="since">since you opened this page</div>
+
+<div class="divider"></div>
+
+<div class="label-bottom">Estimated lives displaced by Just products</div>
+<div class="offset-counter" id="offset">0</div>
+<div class="offset-label">same period</div>
+
+<div class="pause-hint">click anywhere for one second of silence</div>
+<div class="pause-flash" id="flash"></div>
+<div class="source">~80B land animals/yr &middot; FAO 2024</div>
+
+<script>
+// 80 billion land animals per year = ~2,536 per second
+const KILL_RATE = 2536;
+
+// Conservative estimate: Just Egg + Just Meat combined displacement
+// ~8 animal-equivalent lives per second based on retail volume
+const OFFSET_RATE = 8;
+
+let startTime = Date.now();
+let totalPaused = 0;
+let pauseStart = null;
+let isPaused = false;
+let pauseTimeout = null;
+
+const mainEl = document.getElementById('main');
+const offsetEl = document.getElementById('offset');
+const flashEl = document.getElementById('flash');
+
+function formatNumber(n) {
+  return Math.floor(n).toLocaleString('en-US');
+}
+
+function update() {
+  const now = Date.now();
+  let elapsed = (now - startTime - totalPaused) / 1000;
+
+  if (isPaused) {
+    elapsed = (pauseStart - startTime - totalPaused) / 1000;
+  }
+
+  const killed = elapsed * KILL_RATE;
+  const saved = elapsed * OFFSET_RATE;
+
+  mainEl.textContent = formatNumber(killed);
+  offsetEl.textContent = formatNumber(saved);
+
+  requestAnimationFrame(update);
+}
+
+document.body.addEventListener('click', () => {
+  if (isPaused) return;
+
+  isPaused = true;
+  pauseStart = Date.now();
+  mainEl.classList.add('paused');
+  flashEl.classList.add('active');
+
+  setTimeout(() => {
+    flashEl.classList.remove('active');
+  }, 100);
+
+  pauseTimeout = setTimeout(() => {
+    totalPaused += Date.now() - pauseStart;
+    isPaused = false;
+    mainEl.classList.remove('paused');
+    pauseStart = null;
+  }, 1000);
+});
+
+update();
+</script>
+</body>
+</html>
