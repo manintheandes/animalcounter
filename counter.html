@@ -21,20 +21,15 @@
     overflow: hidden;
   }
 
-  .section {
-    text-align: center;
-    margin: 20px 0;
-  }
-
   .label {
     font-size: 10px;
     letter-spacing: 6px;
     text-transform: uppercase;
     color: #555;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
   }
 
-  .counter-insects {
+  .main-counter {
     font-size: clamp(36px, 10vw, 120px);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -43,17 +38,7 @@
     letter-spacing: -2px;
   }
 
-  .counter-land {
-    font-size: clamp(28px, 6vw, 72px);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-    color: #aaa;
-    letter-spacing: -1px;
-  }
-
-  .counter-insects.paused,
-  .counter-land.paused {
+  .main-counter.paused {
     color: #000;
     text-shadow: 0 0 1px #333;
   }
@@ -61,7 +46,7 @@
   .since {
     font-size: 11px;
     color: #444;
-    margin-top: 10px;
+    margin-top: 12px;
     letter-spacing: 3px;
   }
 
@@ -69,7 +54,7 @@
     width: 40px;
     height: 1px;
     background: #222;
-    margin: 16px 0;
+    margin: 40px 0;
   }
 
   .label-offset {
@@ -135,38 +120,24 @@
 </head>
 <body>
 
-<div class="section">
-  <div class="label">Insects killed by humans</div>
-  <div class="counter-insects" id="insects">0</div>
-</div>
+<div class="label">Animals killed by humans</div>
+<div class="main-counter" id="main">0</div>
+<div class="since">since you opened this page</div>
 
 <div class="divider"></div>
 
-<div class="section">
-  <div class="label">Land animals killed for food</div>
-  <div class="counter-land" id="land">0</div>
-</div>
-
-<div class="since">since you opened this page</div>
-
-<div class="divider" style="margin: 28px 0"></div>
-
-<div class="section">
-  <div class="label-offset">Estimated lives displaced by Just products</div>
-  <div class="counter-offset" id="offset">0</div>
-  <div class="offset-label">same period</div>
-</div>
+<div class="label-offset">Estimated lives displaced by Just products</div>
+<div class="counter-offset" id="offset">0</div>
+<div class="offset-label">same period</div>
 
 <div class="pause-hint">click anywhere for one second of silence</div>
 <div class="pause-flash" id="flash"></div>
-<div class="source">~35T insects/yr<br>~80B land animals/yr &middot; FAO 2024</div>
+<div class="source">~35T insects + ~80B land animals/yr</div>
 
 <script>
-// 35 trillion insects per year = ~1,109,589 per second
-const INSECT_RATE = 1109589;
-
-// 80 billion land animals per year = ~2,536 per second
-const LAND_RATE = 2536;
+// 35 trillion insects + 80 billion land animals = ~35.08 trillion/year
+// 35,080,000,000,000 / 365.25 / 24 / 3600 = ~1,112,125 per second
+const KILL_RATE = 1112125;
 
 // Conservative estimate: Just Egg + Just Meat combined displacement
 const OFFSET_RATE = 8;
@@ -176,8 +147,7 @@ let totalPaused = 0;
 let pauseStart = null;
 let isPaused = false;
 
-const insectsEl = document.getElementById('insects');
-const landEl = document.getElementById('land');
+const mainEl = document.getElementById('main');
 const offsetEl = document.getElementById('offset');
 const flashEl = document.getElementById('flash');
 
@@ -193,8 +163,7 @@ function update() {
     elapsed = (pauseStart - startTime - totalPaused) / 1000;
   }
 
-  insectsEl.textContent = formatNumber(elapsed * INSECT_RATE);
-  landEl.textContent = formatNumber(elapsed * LAND_RATE);
+  mainEl.textContent = formatNumber(elapsed * KILL_RATE);
   offsetEl.textContent = formatNumber(elapsed * OFFSET_RATE);
 
   requestAnimationFrame(update);
@@ -205,8 +174,7 @@ document.body.addEventListener('click', () => {
 
   isPaused = true;
   pauseStart = Date.now();
-  insectsEl.classList.add('paused');
-  landEl.classList.add('paused');
+  mainEl.classList.add('paused');
   flashEl.classList.add('active');
 
   setTimeout(() => {
@@ -216,8 +184,7 @@ document.body.addEventListener('click', () => {
   setTimeout(() => {
     totalPaused += Date.now() - pauseStart;
     isPaused = false;
-    insectsEl.classList.remove('paused');
-    landEl.classList.remove('paused');
+    mainEl.classList.remove('paused');
     pauseStart = null;
   }, 1000);
 });
