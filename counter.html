@@ -21,62 +21,76 @@
     overflow: hidden;
   }
 
-  .label-top {
+  .section {
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .label {
     font-size: 10px;
     letter-spacing: 6px;
     text-transform: uppercase;
-    color: #333;
-    margin-bottom: 12px;
+    color: #555;
+    margin-bottom: 10px;
   }
 
-  .main-counter {
-    font-size: clamp(48px, 12vw, 140px);
+  .counter-insects {
+    font-size: clamp(36px, 10vw, 120px);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1;
-    color: #fff;
-    transition: none;
+    color: #e8e8e8;
     letter-spacing: -2px;
   }
 
-  .main-counter.paused {
+  .counter-land {
+    font-size: clamp(28px, 6vw, 72px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: #aaa;
+    letter-spacing: -1px;
+  }
+
+  .counter-insects.paused,
+  .counter-land.paused {
     color: #000;
     text-shadow: 0 0 1px #333;
   }
 
   .since {
     font-size: 11px;
-    color: #222;
-    margin-top: 8px;
+    color: #444;
+    margin-top: 10px;
     letter-spacing: 3px;
   }
 
   .divider {
-    width: 60px;
+    width: 40px;
     height: 1px;
-    background: #1a1a1a;
-    margin: 48px 0;
+    background: #222;
+    margin: 16px 0;
   }
 
-  .label-bottom {
+  .label-offset {
     font-size: 10px;
     letter-spacing: 6px;
     text-transform: uppercase;
-    color: #1a1a1a;
-    margin-bottom: 12px;
+    color: #333;
+    margin-bottom: 10px;
   }
 
-  .offset-counter {
-    font-size: clamp(20px, 4vw, 48px);
+  .counter-offset {
+    font-size: clamp(18px, 3vw, 36px);
     font-weight: 400;
     font-variant-numeric: tabular-nums;
-    color: #1a1a1a;
+    color: #333;
     line-height: 1;
   }
 
   .offset-label {
     font-size: 10px;
-    color: #111;
+    color: #282828;
     margin-top: 8px;
     letter-spacing: 3px;
   }
@@ -87,7 +101,7 @@
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
-    color: #151515;
+    color: #2a2a2a;
     letter-spacing: 4px;
     text-transform: uppercase;
   }
@@ -112,42 +126,58 @@
     bottom: 24px;
     right: 24px;
     font-size: 8px;
-    color: #111;
+    color: #222;
     letter-spacing: 2px;
+    text-align: right;
+    line-height: 1.6;
   }
 </style>
 </head>
 <body>
 
-<div class="label-top">Land animals killed for food</div>
-<div class="main-counter" id="main">0</div>
-<div class="since" id="since">since you opened this page</div>
+<div class="section">
+  <div class="label">Insects killed by humans</div>
+  <div class="counter-insects" id="insects">0</div>
+</div>
 
 <div class="divider"></div>
 
-<div class="label-bottom">Estimated lives displaced by Just products</div>
-<div class="offset-counter" id="offset">0</div>
-<div class="offset-label">same period</div>
+<div class="section">
+  <div class="label">Land animals killed for food</div>
+  <div class="counter-land" id="land">0</div>
+</div>
+
+<div class="since">since you opened this page</div>
+
+<div class="divider" style="margin: 28px 0"></div>
+
+<div class="section">
+  <div class="label-offset">Estimated lives displaced by Just products</div>
+  <div class="counter-offset" id="offset">0</div>
+  <div class="offset-label">same period</div>
+</div>
 
 <div class="pause-hint">click anywhere for one second of silence</div>
 <div class="pause-flash" id="flash"></div>
-<div class="source">~80B land animals/yr &middot; FAO 2024</div>
+<div class="source">~35T insects/yr<br>~80B land animals/yr &middot; FAO 2024</div>
 
 <script>
+// 35 trillion insects per year = ~1,109,589 per second
+const INSECT_RATE = 1109589;
+
 // 80 billion land animals per year = ~2,536 per second
-const KILL_RATE = 2536;
+const LAND_RATE = 2536;
 
 // Conservative estimate: Just Egg + Just Meat combined displacement
-// ~8 animal-equivalent lives per second based on retail volume
 const OFFSET_RATE = 8;
 
 let startTime = Date.now();
 let totalPaused = 0;
 let pauseStart = null;
 let isPaused = false;
-let pauseTimeout = null;
 
-const mainEl = document.getElementById('main');
+const insectsEl = document.getElementById('insects');
+const landEl = document.getElementById('land');
 const offsetEl = document.getElementById('offset');
 const flashEl = document.getElementById('flash');
 
@@ -163,11 +193,9 @@ function update() {
     elapsed = (pauseStart - startTime - totalPaused) / 1000;
   }
 
-  const killed = elapsed * KILL_RATE;
-  const saved = elapsed * OFFSET_RATE;
-
-  mainEl.textContent = formatNumber(killed);
-  offsetEl.textContent = formatNumber(saved);
+  insectsEl.textContent = formatNumber(elapsed * INSECT_RATE);
+  landEl.textContent = formatNumber(elapsed * LAND_RATE);
+  offsetEl.textContent = formatNumber(elapsed * OFFSET_RATE);
 
   requestAnimationFrame(update);
 }
@@ -177,17 +205,19 @@ document.body.addEventListener('click', () => {
 
   isPaused = true;
   pauseStart = Date.now();
-  mainEl.classList.add('paused');
+  insectsEl.classList.add('paused');
+  landEl.classList.add('paused');
   flashEl.classList.add('active');
 
   setTimeout(() => {
     flashEl.classList.remove('active');
   }, 100);
 
-  pauseTimeout = setTimeout(() => {
+  setTimeout(() => {
     totalPaused += Date.now() - pauseStart;
     isPaused = false;
-    mainEl.classList.remove('paused');
+    insectsEl.classList.remove('paused');
+    landEl.classList.remove('paused');
     pauseStart = null;
   }, 1000);
 });
