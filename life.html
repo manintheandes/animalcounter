@@ -117,6 +117,31 @@
     background: #e8e8e8;
     box-shadow: 0 0 6px #e8e8e844;
     cursor: pointer;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  .week.in-progress {
+    background: #e8e8e8;
+    box-shadow: 0 0 6px #e8e8e844;
+    cursor: pointer;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  .week.in-progress.on-track {
+    background: #00ff88;
+    box-shadow: 0 0 6px #00ff8844;
+    animation: pulse-green 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 4px #e8e8e822; }
+    50% { opacity: 0.6; box-shadow: 0 0 10px #e8e8e844; }
+  }
+  @keyframes pulse-green {
+    0%, 100% { opacity: 1; box-shadow: 0 0 4px #00ff8822; }
+    50% { opacity: 0.6; box-shadow: 0 0 10px #00ff8844; }
+  }
+
+  .week.decade-gap {
+    margin-left: 4px;
   }
 
   .grid-sub {
@@ -481,6 +506,11 @@ function buildGrid() {
     dot.className = 'week';
     dot.setAttribute('data-week', i);
 
+    // Decade gap: every 520 weeks (10 years)
+    if (i > 0 && i % 520 === 0) {
+      dot.classList.add('decade-gap');
+    }
+
     if (i < spent) {
       var wr = weekResults[i];
       if (wr) {
@@ -496,14 +526,22 @@ function buildGrid() {
         dot.classList.add('spent');
       }
     } else if (i === spent) {
+      // Current week: in-progress logic
       var wrNow = weekResults[i];
       if (wrNow) {
         dataCount++;
-        if (wrNow.passed) {
-          dot.classList.add('passed');
+        var failedDayCount = wrNow.totalDays - wrNow.daysPassed;
+        if (failedDayCount >= 2) {
+          // 6/7 is mathematically impossible, week is lost
+          dot.classList.add('failed');
+        } else if (wrNow.daysPassed >= 6) {
+          // Already passed
+          dot.classList.add('in-progress');
+          dot.classList.add('on-track');
           passedCount++;
         } else {
-          dot.classList.add('failed');
+          // Still in play
+          dot.classList.add('in-progress');
         }
         dot.classList.add('has-data');
       } else {
