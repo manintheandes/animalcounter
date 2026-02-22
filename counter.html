@@ -227,7 +227,7 @@
 <body>
 
 <div class="counter-view" id="counterView">
-  <div class="label">Animals killed (by humans) since you opened this page</div>
+  <div class="label">1.1 billion animals killed (by humans) every second</div>
   <div class="main-counter" id="main">0</div>
 </div>
 
@@ -300,8 +300,6 @@
   </div>
 </div>
 
-<div class="pause-hint" id="pauseHint">click the number to see the breakdown</div>
-<div class="math-line">84.35B land + 2.4T aquatic + ~35Q insects = ~35 quadrillion/year<br>divided by 31,536,000 seconds/year = ~1.1 billion per second</div>
 
 <script>
 // 84.35B land + 2.504T aquatic + 35.019T insects = 35,021,808,350,000,000/year
@@ -317,7 +315,6 @@ var showBreakdown = false;
 var mainEl = document.getElementById('main');
 var breakdown = document.getElementById('breakdown');
 var breakdownClose = document.getElementById('breakdownClose');
-var pauseHint = document.getElementById('pauseHint');
 
 function formatNumber(n) {
   return Math.floor(n).toLocaleString('en-US');
@@ -334,14 +331,12 @@ mainEl.addEventListener('click', function(e) {
   e.stopPropagation();
   showBreakdown = true;
   breakdown.classList.add('visible');
-  pauseHint.style.display = 'none';
 });
 
 breakdownClose.addEventListener('click', function(e) {
   e.stopPropagation();
   showBreakdown = false;
   breakdown.classList.remove('visible');
-  pauseHint.style.display = '';
 });
 
 update();
