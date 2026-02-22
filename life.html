@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: default;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .label {
+    font-size: 10px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 14px;
+  }
+
+  .main-counter {
+    font-size: clamp(48px, 14vw, 180px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: #e8e8e8;
+    letter-spacing: -2px;
+  }
+
+  .sub {
+    font-size: 13px;
+    color: #333;
+    margin-top: 16px;
+    letter-spacing: 3px;
+  }
+
+  .grid-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    z-index: 10;
+    background: #000;
+  }
+  .grid-container.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .grid-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .grid-label {
+    font-size: 10px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(52, 1fr);
+    gap: 2px;
+    max-width: 90vw;
+    max-height: 70vh;
+  }
+
+  .week {
+    width: clamp(4px, 1.2vw, 10px);
+    height: clamp(4px, 1.2vw, 10px);
+    border-radius: 1px;
+    cursor: default;
+  }
+  .week.spent {
+    background: #222;
+  }
+  .week.passed {
+    background: #00ff88;
+    box-shadow: 0 0 4px #00ff8833;
+  }
+  .week.failed {
+    background: #222;
+  }
+  .week.remaining {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+  }
+  .week.has-data {
+    cursor: pointer;
+  }
+  .week.has-data:hover {
+    box-shadow: 0 0 8px #00ff8844;
+  }
+  .week.now {
+    background: #e8e8e8;
+    box-shadow: 0 0 6px #e8e8e844;
+    cursor: pointer;
+  }
+
+  .grid-sub {
+    font-size: 11px;
+    color: #333;
+    letter-spacing: 3px;
+  }
+
+  .stats {
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 3px;
+    margin-top: 4px;
+  }
+  .stats .green { color: #00ff88; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.92);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 30;
+  }
+  .modal-overlay.visible {
+    display: flex;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    font-size: 9px;
+    color: #333;
+    cursor: pointer;
+    letter-spacing: 3px;
+  }
+
+  .modal-content {
+    max-width: 500px;
+    width: 90vw;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .modal-title {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #555;
+    text-align: center;
+  }
+
+  .modal-result {
+    font-size: clamp(28px, 8vw, 64px);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1;
+  }
+  .modal-result.pass { color: #00ff88; }
+  .modal-result.fail { color: #333; }
+
+  .modal-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #555;
+    border-bottom: 1px solid #111;
+    padding-bottom: 6px;
+  }
+  .stat-row .val { color: #888; }
+  .stat-row .val.good { color: #00ff88; }
+  .stat-row .val.bad { color: #444; }
+
+  .failed-days {
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 1px;
+    line-height: 1.8;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .failed-days .day-entry { display: flex; gap: 8px; }
+  .failed-days .day-label { color: #555; }
+  .failed-days .miss { color: #444; }
+
+  .toggle-hint {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: #2a2a2a;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    z-index: 20;
+  }
+
+  .source {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    font-size: 8px;
+    color: #222;
+    letter-spacing: 2px;
+    z-index: 20;
+  }
+
+  .loading {
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    transition: opacity 0.4s;
+  }
+  .loading.hidden { opacity: 0; }
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">Loading habits</div>
+
+<div class="label">Weeks left to live</div>
+<div class="main-counter" id="main">0</div>
+<div class="sub" id="sub"></div>
+
+<div class="grid-container" id="gridContainer">
+  <div class="grid-inner">
+    <div class="grid-label">Each dot is one week. Green if you showed up.</div>
+    <div class="grid" id="grid"></div>
+    <div class="grid-sub" id="gridSub"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-close" id="modalClose">ESC</div>
+  <div class="modal-content" id="modalContent"></div>
+</div>
+
+<div class="toggle-hint">click to toggle view</div>
+<div class="source">born 3.23.80</div>
+
+<script>
+var BIRTH = new Date(1980, 2, 23);
+var DEATH = new Date(2070, 2, 23);
+var TOTAL_WEEKS = Math.floor((DEATH - BIRTH) / (7 * 24 * 60 * 60 * 1000));
+var MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+var showGrid = false;
+var lyeData = null;
+var weekResults = {};
+
+var gridContainer = document.getElementById('gridContainer');
+var mainEl = document.getElementById('main');
+var subEl = document.getElementById('sub');
+var gridEl = document.getElementById('grid');
+var gridSubEl = document.getElementById('gridSub');
+var statsEl = document.getElementById('stats');
+var modalOverlay = document.getElementById('modalOverlay');
+var modalContent = document.getElementById('modalContent');
+var modalClose = document.getElementById('modalClose');
+var loadingEl = document.getElementById('loading');
+
+// ── Time parsing ──────────────────────────────────
+
+function parseTimeToMinutes(str) {
+  if (!str || typeof str !== 'string') return null;
+  str = str.trim().toLowerCase();
+  var match = str.match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/);
+  if (!match) return null;
+  var h = parseInt(match[1]);
+  var m = parseInt(match[2]);
+  var ampm = match[3];
+  if (ampm === 'am' && h === 12) h = 0;
+  if (ampm === 'pm' && h !== 12) h += 12;
+  return h * 60 + m;
+}
+
+// ── Day pass/fail ─────────────────────────────────
+
+function evaluateDay(entry) {
+  var failures = [];
+
+  var wake = parseTimeToMinutes(entry.wake);
+  if (wake === null || wake > 210) failures.push('wake');
+
+  var sleep = parseTimeToMinutes(entry.sleep);
+  if (sleep === null || sleep > 1230) failures.push('sleep');
+
+  var ots = parseFloat(entry.oura_total_sleep);
+  if (isNaN(ots) || ots < 7) failures.push('sleep hrs');
+
+  if (entry.cold !== 'Yes') failures.push('cold');
+
+  var thich = parseFloat(entry.thich);
+  if (isNaN(thich) || thich < 10) failures.push('thich');
+
+  if (entry.eat !== 'Yes') failures.push('eat');
+
+  var strava = parseFloat(entry.strava_duration);
+  if (isNaN(strava) || strava < 60) failures.push('strava');
+
+  return {
+    passed: failures.length === 0,
+    failures: failures,
+    wake: wake,
+    sleepTime: sleep,
+    ouraSleep: ots,
+    ouraScore: parseFloat(entry.oura_sleep_score) || null,
+    stravaDuration: strava || 0
+  };
+}
+
+// ── Map dates to week indices ─────────────────────
+
+function dateToWeekIndex(dateStr) {
+  var parts = dateStr.split('-');
+  var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  return Math.floor((d.getTime() - BIRTH.getTime()) / MS_PER_WEEK);
+}
+
+function weekIndexToDateRange(weekIndex) {
+  var start = new Date(BIRTH.getTime() + weekIndex * MS_PER_WEEK);
+  var end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000);
+  var fmt = function(d) {
+    return (d.getMonth() + 1) + '/' + d.getDate();
+  };
+  return fmt(start) + ' - ' + fmt(end) + '/' + start.getFullYear();
+}
+
+// ── Process LYE data into week results ────────────
+
+function processData(data) {
+  var byWeek = {};
+
+  Object.keys(data).forEach(function(dateStr) {
+    var wi = dateToWeekIndex(dateStr);
+    if (!byWeek[wi]) byWeek[wi] = {};
+    byWeek[wi][dateStr] = data[dateStr];
+  });
+
+  Object.keys(byWeek).forEach(function(wi) {
+    var weekDays = byWeek[wi];
+    var dates = Object.keys(weekDays).sort();
+    var daysPassed = 0;
+    var totalWake = 0;
+    var wakeCount = 0;
+    var totalOuraScore = 0;
+    var ouraCount = 0;
+    var totalStrava = 0;
+    var failedDays = [];
+
+    dates.forEach(function(dateStr) {
+      var result = evaluateDay(weekDays[dateStr]);
+      if (result.passed) {
+        daysPassed++;
+      } else {
+        failedDays.push({ date: dateStr, failures: result.failures });
+      }
+      if (result.wake !== null) {
+        totalWake += result.wake;
+        wakeCount++;
+      }
+      if (result.ouraScore !== null) {
+        totalOuraScore += result.ouraScore;
+        ouraCount++;
+      }
+      totalStrava += result.stravaDuration;
+    });
+
+    weekResults[wi] = {
+      passed: daysPassed >= 6,
+      daysPassed: daysPassed,
+      totalDays: dates.length,
+      avgWake: wakeCount > 0 ? totalWake / wakeCount : null,
+      avgOuraScore: ouraCount > 0 ? totalOuraScore / ouraCount : null,
+      totalStrava: totalStrava,
+      failedDays: failedDays
+    };
+  });
+}
+
+// ── Formatting helpers ────────────────────────────
+
+function minutesToTimeStr(min) {
+  if (min === null) return '--';
+  var h = Math.floor(min / 60);
+  var m = Math.round(min % 60);
+  var ampm = h >= 12 ? 'pm' : 'am';
+  if (h === 0) h = 12;
+  else if (h > 12) h -= 12;
+  return h + ':' + (m < 10 ? '0' : '') + m + ampm;
+}
+
+function getCurrentWeek() {
+  return Math.floor((Date.now() - BIRTH.getTime()) / MS_PER_WEEK);
+}
+
+function getWeeksLeft() {
+  return (DEATH.getTime() - Date.now()) / MS_PER_WEEK;
+}
+
+function getWeeksSpent() {
+  return (Date.now() - BIRTH.getTime()) / MS_PER_WEEK;
+}
+
+function formatWeeks(w) {
+  return Math.floor(w).toLocaleString('en-US');
+}
+
+// ── Counter ───────────────────────────────────────
+
+function update() {
+  var left = getWeeksLeft();
+  var spent = getWeeksSpent();
+  var pct = ((spent / TOTAL_WEEKS) * 100).toFixed(1);
+  mainEl.textContent = formatWeeks(left);
+  subEl.textContent = pct + '% spent';
+  requestAnimationFrame(update);
+}
+
+// ── Grid ──────────────────────────────────────────
+
+function buildGrid() {
+  var spent = getCurrentWeek();
+  var passedCount = 0;
+  var dataCount = 0;
+
+  while (gridEl.firstChild) gridEl.removeChild(gridEl.firstChild);
+
+  for (var i = 0; i < TOTAL_WEEKS; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'week';
+    dot.setAttribute('data-week', i);
+
+    if (i < spent) {
+      var wr = weekResults[i];
+      if (wr) {
+        dataCount++;
+        if (wr.passed) {
+          dot.classList.add('passed');
+          passedCount++;
+        } else {
+          dot.classList.add('failed');
+        }
+        dot.classList.add('has-data');
+      } else {
+        dot.classList.add('spent');
+      }
+    } else if (i === spent) {
+      var wrNow = weekResults[i];
+      if (wrNow) {
+        dataCount++;
+        if (wrNow.passed) {
+          dot.classList.add('passed');
+          passedCount++;
+        } else {
+          dot.classList.add('failed');
+        }
+        dot.classList.add('has-data');
+      } else {
+        dot.classList.add('now');
+      }
+    } else {
+      dot.classList.add('remaining');
+    }
+    gridEl.appendChild(dot);
+  }
+
+  gridSubEl.textContent = spent.toLocaleString() + ' spent  /  ' + (TOTAL_WEEKS - spent).toLocaleString() + ' left';
+
+  statsEl.textContent = '';
+  if (dataCount > 0) {
+    var greenSpan = document.createElement('span');
+    greenSpan.className = 'green';
+    greenSpan.textContent = passedCount;
+    statsEl.appendChild(greenSpan);
+    statsEl.appendChild(document.createTextNode(' / ' + dataCount + ' weeks you showed up'));
+  }
+}
+
+// ── Modal (DOM-based, no innerHTML) ───────────────
+
+function el(tag, className, text) {
+  var node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+}
+
+function statRow(label, value, good) {
+  var row = el('div', 'stat-row');
+  row.appendChild(el('span', '', label));
+  var valSpan = el('span', 'val ' + (good ? 'good' : 'bad'), value);
+  row.appendChild(valSpan);
+  return row;
+}
+
+function showModal(weekIndex) {
+  var wr = weekResults[weekIndex];
+  if (!wr) return;
+
+  while (modalContent.firstChild) modalContent.removeChild(modalContent.firstChild);
+
+  var range = weekIndexToDateRange(weekIndex);
+
+  modalContent.appendChild(el('div', 'modal-title', 'Week of ' + range));
+
+  var result = el('div', 'modal-result ' + (wr.passed ? 'pass' : 'fail'), wr.passed ? 'PASS' : 'FAIL');
+  modalContent.appendChild(result);
+
+  var statsBlock = el('div', 'modal-stats');
+  statsBlock.appendChild(statRow('Days won', wr.daysPassed + ' / ' + wr.totalDays, wr.daysPassed >= 6));
+  statsBlock.appendChild(statRow('Avg wake', minutesToTimeStr(wr.avgWake), wr.avgWake !== null && wr.avgWake <= 210));
+  statsBlock.appendChild(statRow('Avg Oura score', wr.avgOuraScore !== null ? String(Math.round(wr.avgOuraScore)) : '--', wr.avgOuraScore !== null && wr.avgOuraScore >= 80));
+  statsBlock.appendChild(statRow('Total Strava', Math.round(wr.totalStrava) + ' min', wr.totalStrava >= 60));
+  modalContent.appendChild(statsBlock);
+
+  if (wr.failedDays.length > 0) {
+    var failBlock = el('div', 'failed-days');
+    wr.failedDays.forEach(function(fd) {
+      var entry = el('div', 'day-entry');
+      entry.appendChild(el('span', 'day-label', fd.date));
+      entry.appendChild(el('span', 'miss', fd.failures.join(', ')));
+      failBlock.appendChild(entry);
+    });
+    modalContent.appendChild(failBlock);
+  }
+
+  modalOverlay.classList.add('visible');
+}
+
+function hideModal() {
+  modalOverlay.classList.remove('visible');
+}
+
+// ── Events ────────────────────────────────────────
+
+gridEl.addEventListener('click', function(e) {
+  e.stopPropagation();
+  var dot = e.target;
+  if (!dot.classList.contains('week')) return;
+  if (!dot.classList.contains('has-data')) return;
+  var weekIdx = parseInt(dot.getAttribute('data-week'));
+  showModal(weekIdx);
+});
+
+modalClose.addEventListener('click', function(e) {
+  e.stopPropagation();
+  hideModal();
+});
+
+modalOverlay.addEventListener('click', function(e) {
+  if (e.target === modalOverlay) hideModal();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') hideModal();
+});
+
+document.body.addEventListener('click', function(e) {
+  if (modalOverlay.classList.contains('visible')) return;
+  showGrid = !showGrid;
+  if (showGrid) {
+    buildGrid();
+    gridContainer.classList.add('visible');
+  } else {
+    gridContainer.classList.remove('visible');
+  }
+});
+
+// ── Init ──────────────────────────────────────────
+
+update();
+
+fetch('/api/lye-data')
+  .then(function(r) { return r.json(); })
+  .then(function(json) {
+    lyeData = json.value || json;
+    processData(lyeData);
+    loadingEl.classList.add('hidden');
+  })
+  .catch(function(err) {
+    loadingEl.textContent = 'Data unavailable';
+    console.error(err);
+  });
+</script>
+</body>
+</html>
