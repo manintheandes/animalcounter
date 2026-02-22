@@ -11,13 +11,16 @@
     background: #000;
     color: #fff;
     font-family: 'Space Mono', monospace;
+    cursor: default;
+    user-select: none;
+  }
+
+  .counter-view {
     height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    cursor: default;
-    user-select: none;
     overflow: hidden;
   }
 
@@ -36,41 +39,7 @@
     line-height: 1;
     color: #e8e8e8;
     letter-spacing: -2px;
-  }
-
-  .main-counter.paused {
-    color: #000;
-    text-shadow: 0 0 1px #333;
-  }
-
-  .divider {
-    width: 40px;
-    height: 1px;
-    background: #222;
-    margin: 48px 0;
-  }
-
-  .label-offset {
-    font-size: 10px;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: #333;
-    margin-bottom: 10px;
-  }
-
-  .counter-offset {
-    font-size: clamp(18px, 3vw, 36px);
-    font-weight: 400;
-    font-variant-numeric: tabular-nums;
-    color: #333;
-    line-height: 1;
-  }
-
-  .offset-label {
-    font-size: 10px;
-    color: #282828;
-    margin-top: 8px;
-    letter-spacing: 3px;
+    cursor: pointer;
   }
 
   .pause-hint {
@@ -82,24 +51,10 @@
     color: #2a2a2a;
     letter-spacing: 4px;
     text-transform: uppercase;
+    z-index: 5;
   }
 
-  .pause-flash {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #fff;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.05s;
-  }
-  .pause-flash.active {
-    opacity: 0.03;
-  }
-
-  .source {
+  .source-line {
     position: fixed;
     bottom: 24px;
     right: 24px;
@@ -108,65 +63,286 @@
     letter-spacing: 2px;
     text-align: right;
     line-height: 1.6;
+    z-index: 5;
+  }
+
+  /* Breakdown overlay */
+  .breakdown {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 20;
+    overflow-y: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    -webkit-overflow-scrolling: touch;
+  }
+  .breakdown.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .breakdown-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 60px 24px 120px;
+  }
+
+  .breakdown-close {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    font-size: 9px;
+    color: #444;
+    letter-spacing: 3px;
+    cursor: pointer;
+    z-index: 25;
+    text-transform: uppercase;
+  }
+  .breakdown-close:hover { color: #888; }
+
+  .breakdown-title {
+    font-size: 11px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 8px;
+  }
+
+  .breakdown-total {
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: 700;
+    color: #e8e8e8;
+    letter-spacing: -1px;
+    margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .breakdown-rate {
+    font-size: 11px;
+    color: #444;
+    letter-spacing: 2px;
+    margin-bottom: 48px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #00ff88;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #111;
+  }
+
+  .section-note {
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 1px;
+    line-height: 1.8;
+    margin-bottom: 24px;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid #0d0d0d;
+  }
+
+  .row-name {
+    font-size: 12px;
+    color: #888;
+    letter-spacing: 1px;
+  }
+
+  .row-number {
+    font-size: 12px;
+    color: #ccc;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+    text-align: right;
+  }
+
+  .row-sub {
+    font-size: 9px;
+    color: #333;
+    letter-spacing: 1px;
+    padding: 4px 0 10px;
+    border-bottom: 1px solid #0d0d0d;
+  }
+
+  .section-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 14px 0;
+    margin-bottom: 48px;
+  }
+
+  .section-total .row-name {
+    color: #555;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  .section-total .row-number {
+    color: #e8e8e8;
+    font-weight: 700;
+  }
+
+  .excluded {
+    margin-top: 48px;
+  }
+
+  .excluded .section-label {
+    color: #553300;
+  }
+
+  .methodology {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid #111;
+  }
+
+  .methodology p {
+    font-size: 10px;
+    color: #2a2a2a;
+    letter-spacing: 1px;
+    line-height: 2;
+    margin-bottom: 12px;
+  }
+
+  .methodology a {
+    color: #333;
   }
 </style>
 </head>
 <body>
 
-<div class="label">Animals killed (by humans) since you opened this page</div>
-<div class="main-counter" id="main">0</div>
+<div class="counter-view" id="counterView">
+  <div class="label">Animals killed (by humans) since you opened this page</div>
+  <div class="main-counter" id="main">0</div>
+</div>
 
-<div class="pause-hint">click anywhere for one second of silence</div>
-<div class="pause-flash" id="flash"></div>
-<div class="source">~35T insects + ~80B land animals/yr</div>
+<div class="breakdown" id="breakdown">
+  <div class="breakdown-close" id="breakdownClose">close</div>
+  <div class="breakdown-inner">
+
+    <div class="breakdown-title">How the number breaks down</div>
+    <div class="breakdown-total" id="breakdownTotal">~35 quadrillion per year</div>
+    <div class="breakdown-rate">~1,109,512,998 per second</div>
+
+    <!-- LAND ANIMALS -->
+    <div class="section-label">Land animals killed for food</div>
+    <div class="section-note">Animals intentionally bred and slaughtered. Source: FAOSTAT 2022/2023.</div>
+
+    <div class="row"><span class="row-name">Chickens</span><span class="row-number">76,200,000,000</span></div>
+    <div class="row"><span class="row-name">Ducks</span><span class="row-number">4,100,000,000</span></div>
+    <div class="row"><span class="row-name">Pigs</span><span class="row-number">1,500,000,000</span></div>
+    <div class="row"><span class="row-name">Sheep & Lambs</span><span class="row-number">695,000,000</span></div>
+    <div class="row"><span class="row-name">Goats</span><span class="row-number">543,000,000</span></div>
+    <div class="row"><span class="row-name">Turkeys</span><span class="row-number">521,000,000</span></div>
+    <div class="row"><span class="row-name">Rabbits</span><span class="row-number">482,000,000</span></div>
+    <div class="row"><span class="row-name">Cattle</span><span class="row-number">309,000,000</span></div>
+    <div class="section-total"><span class="row-name">Subtotal</span><span class="row-number">~84,350,000,000</span></div>
+
+    <!-- AQUATIC -->
+    <div class="section-label">Aquatic animals</div>
+    <div class="section-note">Fishing industry measures in tons, not lives. Individual counts reverse-engineered from average species weight. Source: Fishcount.org, Animal Welfare journal 2023/2024.</div>
+
+    <div class="row"><span class="row-name">Wild-caught fish</span><span class="row-number">1,100,000,000,000 - 2,200,000,000,000</span></div>
+    <div class="row-sub">Midpoint estimate: 1.65 trillion individuals</div>
+    <div class="row"><span class="row-name">Farmed crustaceans</span><span class="row-number">310,000,000,000 - 950,000,000,000</span></div>
+    <div class="row-sub">Mostly shrimp and prawns. Midpoint: 630 billion</div>
+    <div class="row"><span class="row-name">Farmed fish</span><span class="row-number">124,000,000,000</span></div>
+    <div class="row"><span class="row-name">Bycatch</span><span class="row-number">tens - hundreds of billions</span></div>
+    <div class="row-sub">Non-target fish, dolphins, whales, sea turtles caught in nets, thrown back dead or dying</div>
+    <div class="section-total"><span class="row-name">Subtotal (midpoint)</span><span class="row-number">~2,400,000,000,000</span></div>
+
+    <!-- INSECTS -->
+    <div class="section-label">Insects killed directly</div>
+    <div class="section-note">Conservative baseline of direct exploitation. Source: Rethink Priorities, "The Scale of Direct Human Impact on Invertebrates," industry production data.</div>
+
+    <div class="row"><span class="row-name">Carmine & dye production</span><span class="row-number">4,600,000,000,000 - 21,000,000,000,000</span></div>
+    <div class="row-sub">Cochineal bugs crushed for red dye (food coloring, cosmetics, textiles)</div>
+    <div class="row"><span class="row-name">Food & feed production</span><span class="row-number">1,000,000,000,000 - 10,000,000,000,000</span></div>
+    <div class="row-sub">Black soldier flies, mealworms, crickets farmed for human food or livestock feed</div>
+    <div class="row"><span class="row-name">Silk production</span><span class="row-number">840,000,000,000 - 1,000,000,000,000</span></div>
+    <div class="row-sub">Silkworms boiled alive inside their cocoons</div>
+    <div class="row"><span class="row-name">Agricultural pesticides</span><span class="row-number">~35,000,000,000,000,000</span></div>
+    <div class="row-sub">35 quadrillion. The dominant cause of insect death by humans. Dwarfs every other category combined.</div>
+    <div class="section-total"><span class="row-name">Subtotal</span><span class="row-number">~35,000,000,000,000,000</span></div>
+
+    <!-- EXCLUDED -->
+    <div class="excluded">
+      <div class="section-label">Not included in the counter</div>
+      <div class="section-note">Additional categories too uncertain to quantify precisely.</div>
+
+      <div class="row"><span class="row-name">Habitat destruction</span><span class="row-number">unquantified</span></div>
+      <div class="row-sub">Deforestation, urbanization, monoculture. Kills are indirect but permanent.</div>
+      <div class="row"><span class="row-name">Lab animals</span><span class="row-number">~100,000,000</span></div>
+      <div class="row-sub">Mice, rats, fish, rabbits, primates. Relatively small in this context.</div>
+    </div>
+
+    <!-- METHODOLOGY -->
+    <div class="methodology">
+      <p>The counter uses midpoint estimates where ranges exist. Land animal data from FAOSTAT is precise. Aquatic data carries moderate uncertainty. The insect pesticide figure (35 quadrillion) dominates the total and carries the most uncertainty, but represents the best available estimate of scale.</p>
+      <p>The counter ticks at ~1.1 billion per second. That is 84.35B land animals + 2.4T aquatic + 35 quadrillion insects = ~35 quadrillion total, divided by seconds in a year.</p>
+      <p>Data compiled by Gemini (Google) and coded by Claude (Anthropic), February 2026.</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="pause-hint" id="pauseHint">click the number to see the breakdown</div>
+<div class="source-line">~35 quadrillion animals/yr</div>
 
 <script>
-// 35 trillion insects + 80 billion land animals = ~35.08 trillion/year
-// 35,080,000,000,000 / 365.25 / 24 / 3600 = ~1,112,125 per second
-const KILL_RATE = 1112125;
+// 84.35B land + 2.4T aquatic + 35 quadrillion insects = ~35,002,484,350,000,000/year
+// 35,002,484,350,000,000 / 365.25 / 24 / 3600 = ~1,109,512,998 per second
+var KILL_RATE = 1109512998;
 
-let startTime = Date.now();
-let totalPaused = 0;
-let pauseStart = null;
-let isPaused = false;
+var startTime = Date.now();
+var totalPaused = 0;
+var pauseStart = null;
+var isPaused = false;
+var showBreakdown = false;
 
-const mainEl = document.getElementById('main');
-const flashEl = document.getElementById('flash');
+var mainEl = document.getElementById('main');
+var breakdown = document.getElementById('breakdown');
+var breakdownClose = document.getElementById('breakdownClose');
+var pauseHint = document.getElementById('pauseHint');
 
 function formatNumber(n) {
   return Math.floor(n).toLocaleString('en-US');
 }
 
 function update() {
-  const now = Date.now();
-  let elapsed = (now - startTime - totalPaused) / 1000;
-
-  if (isPaused) {
-    elapsed = (pauseStart - startTime - totalPaused) / 1000;
-  }
-
+  var now = Date.now();
+  var elapsed = (now - startTime - totalPaused) / 1000;
   mainEl.textContent = formatNumber(elapsed * KILL_RATE);
   requestAnimationFrame(update);
 }
 
-document.body.addEventListener('click', () => {
-  if (isPaused) return;
+mainEl.addEventListener('click', function(e) {
+  e.stopPropagation();
+  showBreakdown = true;
+  breakdown.classList.add('visible');
+  pauseHint.style.display = 'none';
+});
 
-  isPaused = true;
-  pauseStart = Date.now();
-  mainEl.classList.add('paused');
-  flashEl.classList.add('active');
-
-  setTimeout(() => {
-    flashEl.classList.remove('active');
-  }, 100);
-
-  setTimeout(() => {
-    totalPaused += Date.now() - pauseStart;
-    isPaused = false;
-    mainEl.classList.remove('paused');
-    pauseStart = null;
-  }, 1000);
+breakdownClose.addEventListener('click', function(e) {
+  e.stopPropagation();
+  showBreakdown = false;
+  breakdown.classList.remove('visible');
+  pauseHint.style.display = '';
 });
 
 update();
