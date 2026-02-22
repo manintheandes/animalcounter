@@ -116,12 +116,6 @@
 <div class="label">Animals killed (by humans) since you opened this page</div>
 <div class="main-counter" id="main">0</div>
 
-<div class="divider"></div>
-
-<div class="label-offset">Estimated lives displaced by Just products</div>
-<div class="counter-offset" id="offset">0</div>
-<div class="offset-label">same period</div>
-
 <div class="pause-hint">click anywhere for one second of silence</div>
 <div class="pause-flash" id="flash"></div>
 <div class="source">~35T insects + ~80B land animals/yr</div>
@@ -131,16 +125,12 @@
 // 35,080,000,000,000 / 365.25 / 24 / 3600 = ~1,112,125 per second
 const KILL_RATE = 1112125;
 
-// Conservative estimate: Just Egg + Just Meat combined displacement
-const OFFSET_RATE = 8;
-
 let startTime = Date.now();
 let totalPaused = 0;
 let pauseStart = null;
 let isPaused = false;
 
 const mainEl = document.getElementById('main');
-const offsetEl = document.getElementById('offset');
 const flashEl = document.getElementById('flash');
 
 function formatNumber(n) {
@@ -156,8 +146,6 @@ function update() {
   }
 
   mainEl.textContent = formatNumber(elapsed * KILL_RATE);
-  offsetEl.textContent = formatNumber(elapsed * OFFSET_RATE);
-
   requestAnimationFrame(update);
 }
 
