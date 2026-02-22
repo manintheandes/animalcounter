@@ -217,6 +217,15 @@
   .failed-days .day-label { color: #555; }
   .failed-days .miss { color: #444; }
 
+  .modal-anchor {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #333;
+    text-align: center;
+    margin-top: 8px;
+  }
+
   .toggle-hint {
     position: fixed;
     bottom: 24px;
@@ -327,7 +336,7 @@ function evaluateDay(entry) {
   if (sleep === null || sleep > 1230) failures.push('sleep');
 
   var ots = parseFloat(entry.oura_total_sleep);
-  if (isNaN(ots) || ots < 7) failures.push('sleep hrs');
+  if (isNaN(ots) || ots < 6.25) failures.push('sleep hrs');
 
   if (entry.cold !== 'Yes') failures.push('cold');
 
@@ -337,7 +346,7 @@ function evaluateDay(entry) {
   if (entry.eat !== 'Yes') failures.push('eat');
 
   var strava = parseFloat(entry.strava_duration);
-  if (isNaN(strava) || strava < 60) failures.push('strava');
+  if (isNaN(strava) || strava < 30) failures.push('strava');
 
   return {
     passed: failures.length === 0,
@@ -552,7 +561,7 @@ function showModal(weekIndex) {
   statsBlock.appendChild(statRow('Days won', wr.daysPassed + ' / ' + wr.totalDays, wr.daysPassed >= 6));
   statsBlock.appendChild(statRow('Avg wake', minutesToTimeStr(wr.avgWake), wr.avgWake !== null && wr.avgWake <= 210));
   statsBlock.appendChild(statRow('Avg Oura score', wr.avgOuraScore !== null ? String(Math.round(wr.avgOuraScore)) : '--', wr.avgOuraScore !== null && wr.avgOuraScore >= 80));
-  statsBlock.appendChild(statRow('Total Strava', Math.round(wr.totalStrava) + ' min', wr.totalStrava >= 60));
+  statsBlock.appendChild(statRow('Total Strava', Math.round(wr.totalStrava) + ' min', wr.totalStrava >= 30));
   modalContent.appendChild(statsBlock);
 
   if (wr.failedDays.length > 0) {
@@ -565,6 +574,9 @@ function showModal(weekIndex) {
     });
     modalContent.appendChild(failBlock);
   }
+
+  var anchor = el('div', 'modal-anchor', 'This week mattered.');
+  modalContent.appendChild(anchor);
 
   modalOverlay.classList.add('visible');
 }
