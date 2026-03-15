@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Man in the Andes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    overflow-x: hidden;
+    cursor: default;
+    user-select: none;
+  }
+
+  /* ── SCENE 1: THE MOUNTAINS ── */
+  .scene-mountains {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0b1a2e 0%, #1a3a5c 30%, #2d6b4f 60%, #1a3a2a 100%);
+    transition: background 2s ease;
+  }
+
+  /* Animated mountain silhouettes via CSS */
+  .mountains {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 55%;
+  }
+
+  .mountain {
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+  }
+
+  .m1 {
+    left: -5%;
+    border-width: 0 35vw 45vh 35vw;
+    border-color: transparent transparent #0f2018 transparent;
+  }
+  .m2 {
+    left: 15%;
+    border-width: 0 28vw 55vh 28vw;
+    border-color: transparent transparent #132a1e transparent;
+  }
+  .m3 {
+    left: 35%;
+    border-width: 0 32vw 50vh 32vw;
+    border-color: transparent transparent #0d1f15 transparent;
+  }
+  .m4 {
+    left: 55%;
+    border-width: 0 30vw 48vh 30vw;
+    border-color: transparent transparent #112618 transparent;
+  }
+  .m5 {
+    left: 72%;
+    border-width: 0 25vw 40vh 25vw;
+    border-color: transparent transparent #0f2018 transparent;
+  }
+
+  /* Snow caps */
+  .snow {
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    opacity: 0.25;
+  }
+  .s2 {
+    left: calc(15% + 14vw);
+    border-width: 0 14vw 8vh 14vw;
+    border-color: transparent transparent #ffffff transparent;
+    bottom: calc(55vh - 8vh);
+  }
+  .s3 {
+    left: calc(35% + 16vw);
+    border-width: 0 16vw 7vh 16vw;
+    border-color: transparent transparent #ffffff transparent;
+    bottom: calc(50vh - 7vh);
+  }
+
+  /* Stars */
+  .stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 3s infinite ease-in-out;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.9; }
+  }
+
+  /* Title text */
+  .title-group {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+  }
+
+  .title-small {
+    font-size: 10px;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 12px;
+  }
+
+  .title-main {
+    font-size: clamp(28px, 6vw, 64px);
+    font-weight: 700;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  .title-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 3px;
+    line-height: 1.8;
+  }
+
+  .scroll-prompt {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.15);
+    animation: pulse-down 2s infinite ease-in-out;
+    z-index: 5;
+  }
+
+  @keyframes pulse-down {
+    0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.15; }
+    50% { transform: translateX(-50%) translateY(6px); opacity: 0.4; }
+  }
+
+  /* ── SCENE 2: TRANSITION ── */
+  .scene-transition {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: #000;
+    position: relative;
+  }
+
+  .transition-text {
+    font-size: clamp(14px, 3vw, 24px);
+    color: #333;
+    letter-spacing: 2px;
+    line-height: 2;
+    text-align: center;
+    max-width: 700px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+
+  .transition-text.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .transition-text em {
+    font-style: normal;
+    color: #fff;
+  }
+
+  /* ── SCENE 3: THE REVEAL ── */
+  .scene-reveal {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 24px;
+    background: #000;
+    position: relative;
+  }
+
+  .reveal-label {
+    font-size: 9px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 12px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s ease 0.3s, transform 1s ease 0.3s;
+  }
+
+  .reveal-counter {
+    font-size: clamp(36px, 10vw, 120px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #e8e8e8;
+    letter-spacing: -2px;
+    line-height: 1;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 1.2s ease 0.6s, transform 1.2s ease 0.6s;
+  }
+
+  .reveal-since {
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 3px;
+    margin-top: 14px;
+    opacity: 0;
+    transition: opacity 1s ease 1s;
+  }
+
+  .reveal-label.visible,
+  .reveal-since.visible { opacity: 1; transform: translateY(0); }
+  .reveal-counter.visible { opacity: 1; transform: scale(1); }
+
+  /* ── SCENE 4: PERSPECTIVE ── */
+  .scene-perspective {
+    padding: 80px 24px 120px;
+    background: #000;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .fact-card {
+    border-left: 2px solid #1a3a2a;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .fact-card.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .fact-number {
+    font-size: clamp(20px, 4vw, 36px);
+    font-weight: 700;
+    color: #e8e8e8;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+  }
+
+  .fact-label {
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 2px;
+    line-height: 1.8;
+  }
+
+  /* ── SCENE 5: CLOSING ── */
+  .scene-closing {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    text-align: center;
+    background: linear-gradient(180deg, #000 0%, #0b1a2e 100%);
+  }
+
+  .closing-text {
+    font-size: clamp(12px, 2.5vw, 18px);
+    color: #555;
+    letter-spacing: 2px;
+    line-height: 2.2;
+    max-width: 600px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .closing-text.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .closing-text strong {
+    color: #2d6b4f;
+    font-weight: 700;
+  }
+
+  .closing-cta {
+    margin-top: 40px;
+    opacity: 0;
+    transition: opacity 1s ease 0.5s;
+  }
+
+  .closing-cta.visible { opacity: 1; }
+
+  .closing-cta a {
+    font-size: 9px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #333;
+    text-decoration: none;
+    border: 1px solid #222;
+    padding: 12px 28px;
+    transition: color 0.3s, border-color 0.3s;
+  }
+
+  .closing-cta a:hover {
+    color: #888;
+    border-color: #444;
+  }
+</style>
+</head>
+<body>
+
+<!-- SCENE 1: Serene Andes -->
+<div class="scene-mountains" id="sceneMountains">
+  <div class="stars" id="stars"></div>
+  <div class="mountains">
+    <div class="mountain m1"></div>
+    <div class="mountain m2"></div>
+    <div class="snow s2"></div>
+    <div class="mountain m3"></div>
+    <div class="snow s3"></div>
+    <div class="mountain m4"></div>
+    <div class="mountain m5"></div>
+  </div>
+  <div class="title-group">
+    <div class="title-small">a personal project by</div>
+    <div class="title-main">The Man in the Andes</div>
+    <div class="title-sub">somewhere in the mountains, someone is counting</div>
+  </div>
+  <div class="scroll-prompt">scroll</div>
+</div>
+
+<!-- SCENE 2: The turn -->
+<div class="scene-transition" id="sceneTransition">
+  <div class="transition-text" id="transText">
+    From one of the most <em>biodiverse places on Earth</em>,<br>
+    he built a counter for what we're losing.<br><br>
+    Not species. Not acres.<br>
+    <em>Individual lives. Per second.</em>
+  </div>
+</div>
+
+<!-- SCENE 3: The live counter reveal -->
+<div class="scene-reveal" id="sceneReveal">
+  <div class="reveal-label" id="revealLabel">animals killed since you opened this page</div>
+  <div class="reveal-counter" id="revealCounter">0</div>
+  <div class="reveal-since" id="revealSince">and counting</div>
+</div>
+
+<!-- SCENE 4: Perspective cards -->
+<div class="scene-perspective" id="scenePerspective">
+  <div class="fact-card" id="fact1">
+    <div class="fact-number" id="factLife"></div>
+    <div class="fact-label">animals killed in an average human lifetime (73 years)</div>
+  </div>
+  <div class="fact-card" id="fact2">
+    <div class="fact-number">1,110,534,258</div>
+    <div class="fact-label">killed every second &mdash; more than the entire human population</div>
+  </div>
+  <div class="fact-card" id="fact3">
+    <div class="fact-number" id="factReading"></div>
+    <div class="fact-label">killed in the time it took you to read this far</div>
+  </div>
+  <div class="fact-card" id="fact4">
+    <div class="fact-number">35 quadrillion</div>
+    <div class="fact-label">insects killed by pesticides every year &mdash; 99.7% of the total</div>
+  </div>
+</div>
+
+<!-- SCENE 5: Closing -->
+<div class="scene-closing" id="sceneClosing">
+  <div class="closing-text" id="closingText">
+    The surprising thing isn't the number.<br>
+    It's that someone in the <strong>Andes</strong> decided to count.<br><br>
+    Because the first step to changing a number<br>
+    is making it <strong>impossible to ignore</strong>.
+  </div>
+  <div class="closing-cta" id="closingCta">
+    <a href="counter.html">see the full counter &rarr;</a>
+  </div>
+</div>
+
+<script>
+// ── COUNTER DATA ──
+var KILL_RATE = 1110534258; // per second
+var pageOpenTime = Date.now();
+
+// ── STARS ──
+(function() {
+  var container = document.getElementById('stars');
+  for (var i = 0; i < 80; i++) {
+    var s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 3) + 's';
+    s.style.width = s.style.height = (Math.random() * 2 + 1) + 'px';
+    container.appendChild(s);
+  }
+})();
+
+// ── FORMAT ──
+function fmt(n) {
+  return Math.floor(n).toLocaleString('en-US');
+}
+
+// ── LIFETIME CALC ──
+var lifetimeKills = KILL_RATE * 73 * 365.25 * 24 * 3600;
+document.getElementById('factLife').textContent = lifetimeKills.toExponential(2);
+
+// ── SCROLL-TRIGGERED REVEALS ──
+var observed = new Map();
+
+function onIntersect(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      var el = entry.target;
+      var targets = observed.get(el);
+      if (targets) {
+        targets.forEach(function(t) {
+          document.getElementById(t).classList.add('visible');
+        });
+      }
+    }
+  });
+}
+
+var observer = new IntersectionObserver(onIntersect, { threshold: 0.4 });
+
+function observe(triggerId, revealIds) {
+  var el = document.getElementById(triggerId);
+  observed.set(el, revealIds);
+  observer.observe(el);
+}
+
+observe('sceneTransition', ['transText']);
+observe('sceneReveal', ['revealLabel', 'revealCounter', 'revealSince']);
+observe('fact1', ['fact1']);
+observe('fact2', ['fact2']);
+observe('fact3', ['fact3']);
+observe('fact4', ['fact4']);
+observe('sceneClosing', ['closingText', 'closingCta']);
+
+// ── LIVE COUNTER ──
+var counterEl = document.getElementById('revealCounter');
+var readingEl = document.getElementById('factReading');
+
+function tick() {
+  var elapsed = (Date.now() - pageOpenTime) / 1000;
+  var killed = elapsed * KILL_RATE;
+  counterEl.textContent = fmt(killed);
+  readingEl.textContent = fmt(killed);
+  requestAnimationFrame(tick);
+}
+
+tick();
+</script>
+</body>
+</html>
